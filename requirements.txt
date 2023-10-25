@@ -3,4 +3,5 @@ numpy
 pyarrow
 streamlit
 fastapi
+uvicorn
 foreman
