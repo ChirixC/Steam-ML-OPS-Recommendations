@@ -1,0 +1,19 @@
+Work flow
+
+Se hizo se modificó las datasets con Codebeauty.ord JsonFixer
+Se volvieron a comprimir para uso de menor espacio
+
+
+-------------------
+
+Requirements.txt
+
+fastapi
+pandas
+"uvicorn[standard]"
+
+
+Cantidad de dinero gastada por el usuario user_id
+
+user_items -> user_id | lista y cantidad de [items]
+en la lista de [items] tenemos los ID de los items y el item_name
