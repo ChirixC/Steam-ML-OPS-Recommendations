@@ -37,4 +37,8 @@ app.add_middleware(
 
 @app.get("/")
 def index():
-    return {"message": "helloo 2"}
+    return {"message": "Esta es una prueba y si vas a link/pam hay un secreto"}
+
+@app.get("/pam")
+def index():
+    return {"message": "♥ ❤ ♥"}
