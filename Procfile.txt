@@ -1,1 +1,2 @@
-api: uvicorn api:app --reload interface: streamlit run streamlit.py
+api: uvicorn api:app --reload
+interface: streamlit run streamlit.py
