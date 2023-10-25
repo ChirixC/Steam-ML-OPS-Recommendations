@@ -1,11 +1,20 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 import pyarrow as pa
 import pyarrow.parquet as pq
 import os
 
 app = FastAPI()
-port = os.environ.get("PORT", 8000) # 
-app.run(host="0.0.0.0", port=port) # 
+
+origins = ["*"]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origin = origins,
+    allow_credentials = True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
+
 
 clients = pq.read_table('user_items_df.parquet')
 clients_pd = pa.Table.to_pandas(clients)
