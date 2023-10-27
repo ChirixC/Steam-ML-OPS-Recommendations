@@ -15,5 +15,14 @@ pandas
 
 Cantidad de dinero gastada por el usuario user_id
 
-user_items -> user_id | lista y cantidad de [items]
-en la lista de [items] tenemos los ID de los items y el item_name
+[{'user':ces1, 'item_id': 12312, comment:'cesintenta'}]
+
+Query1 : | Steam_Games | Columnas: [Developer, Price]
+
+
+Query2 : | user_items   -> Tengo la cantidad de item
+		        -> También tengo una lista con los id y nombre de cada item
+	 
+	 | steam_games  -> Tengo los items por id o nombre con su precio
+	 
+  	 | user_reviews -> cantidad de reviews por usuario y qué porcentaje 			   de esos reeviews son positivos

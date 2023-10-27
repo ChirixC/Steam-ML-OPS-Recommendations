@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 
 # Define the FastAPI endpoint
-FASTAPI_URL = "http://127.0.0.1:8000"
+FASTAPI_URL = "http://0.0.0.0:10000"
 
 # Create a Streamlit app
 st.title("César Chirino ML Ops")
