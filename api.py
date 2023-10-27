@@ -88,13 +88,16 @@ def userdata(user_id: str):
 
     
     def get_items_names(items_dataframe,user_id):
+        items_dataframe = items_dataframe.set_index("user_id")    
+        if user_id in items_dataframe.index:
+            found_data_frame = items_dataframe.loc[user_id]
 
-        items_dataframe = items_dataframe.set_index("user_id")
-        found_data_frame = items_dataframe.loc[user_id]
-        if not found_data_frame.empty:
-            return found_data_frame
+            if not found_data_frame.empty:
+                print('entra4')
+                return found_data_frame
         else:
             return None
+        return None
 
 
     def get_items_id(row_df):
@@ -111,7 +114,6 @@ def userdata(user_id: str):
         for item in items_list:
             intintem=int(item)
             price = query_2_steam.query("id == @intintem")
-            # prices.append((price['price'].values))
 
             if len(price['price'].values) > 0:
                 waste = waste+price['price'].values[0]
