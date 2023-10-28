@@ -17,26 +17,6 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-
-# clients = pq.read_table('user_items_df.parquet')
-# clients_pd = pa.Table.to_pandas(clients)
-
-# def get_items_amount(user):
-#     # Debería checkar si esta lista tiene duplicados
-#     items = clients_pd.loc[clients_pd['user_id'] == user, 'items']  
-#     items2 = items[0]
-#     return items2.size
-
-# @app.get('/user/')
-# def get_client_items(user_id: str):
-#     count = get_items_amount(user_id)
-#     return {"result": count}
-
-# @app.get('/clients/{user}')
-# def get_client_items(user):
-#     count = get_items_amount(user)
-#     return count
-
 @app.get("/")
 def index():
     return {"message": "Esta es una prueba y si vas a link/pam hay un secreto"}
@@ -148,3 +128,71 @@ def userdata(user_id: str):
 
     return json_output
     
+@app.get("/UserForGenre/{genre}")
+def UserForGenre(genre: str):
+
+    Global_Max_User_id = ''
+    Global_Max_Time_Played = 0
+
+    def read_parquets ():
+        genre_grouped_steam = pd.read_parquet('genre_grouped.parquet')
+        return genre_grouped_steam
+
+    def load_parquet_in_batches(file_path,Global_Max_Time_Played, Global_Max_User_id):
+        """Loads a Parquet file in batches.
+
+        Args:
+        file_path: The path to the Parquet file.
+        chunk_size: The size of each batch.
+
+        Returns:
+        A list of Pandas DataFrames.
+        """
+        parquet_file = pq.ParquetFile(file_path)
+        dataframes = []
+        for batch in parquet_file.iter_batches(batch_size=5000):
+            dataframes = batch.to_pandas()
+            Global_Max_Time_Played, Global_Max_User_id= check_global_user(dataframes,Global_Max_Time_Played, Global_Max_User_id)
+        return Global_Max_Time_Played, Global_Max_User_id
+
+    def get_frame_genre(genre_grouped_steam,genre):  
+        genre_grouped_steam = genre_grouped_steam.set_index("genres")  
+        if genre in genre_grouped_steam.index:
+            found_data_frame = genre_grouped_steam.loc[genre]  # esto lo debería hacer una sola vez afuera
+            print('LEN ', len(found_data_frame['id_list']))
+            return found_data_frame
+        else:
+            return None
+        
+
+    def genre_check(genre_grouped_steam,item_id) :      
+            return float(item_id) in genre_grouped_steam['id_list']
+
+
+    def check_global_user (batch_user_items,Global_Max_Time_Played, Global_Max_User_id):
+        for row in batch_user_items.iterrows() :
+
+            data_row = row[1]
+            user_time_played = 0
+            user_id_row = data_row['user_id']
+            items_row = tuple(data_row['items'])
+
+            for item in items_row:
+
+                if genre_check(genre_grouped_steam,item['item_id']):
+                    user_time_played += float(item['playtime_forever']) 
+            
+            if user_time_played > Global_Max_Time_Played:
+                Global_Max_Time_Played = user_time_played
+                Global_Max_User_id = user_id_row
+        return Global_Max_Time_Played, Global_Max_User_id
+            
+    genre_grouped_steam = read_parquets()
+    genre_grouped_steam = get_frame_genre(genre_grouped_steam,genre)
+
+    if genre_grouped_steam: Global_Max_Time_Played, Global_Max_User_id = load_parquet_in_batches('query_2_items.parquet',Global_Max_Time_Played, Global_Max_User_id)
+
+    print(Global_Max_Time_Played)
+    print(Global_Max_User_id)
+
+    return {Global_Max_User_id,Global_Max_Time_Played}
