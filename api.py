@@ -190,7 +190,7 @@ def UserForGenre(genre: str):
     genre_grouped_steam = read_parquets()
     genre_grouped_steam = get_frame_genre(genre_grouped_steam,genre)
 
-    if genre_grouped_steam: Global_Max_Time_Played, Global_Max_User_id = load_parquet_in_batches('query_2_items.parquet',Global_Max_Time_Played, Global_Max_User_id)
+    if genre_grouped_steam is not None: Global_Max_Time_Played, Global_Max_User_id = load_parquet_in_batches('query_2_items.parquet',Global_Max_Time_Played, Global_Max_User_id)
 
     print(Global_Max_Time_Played)
     print(Global_Max_User_id)
