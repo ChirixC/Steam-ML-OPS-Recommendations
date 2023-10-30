@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import pyarrow.parquet as pq
 from ast import literal_eval
 import pandas as pd
+import json as js
 import os
 
 app = FastAPI()
@@ -38,161 +39,109 @@ def developer(developer: str):
     df_json = literal_eval(df_sum.to_json(orient='index'))
     return df_json
 
+
+
 @app.get("/userdata/{user_id}")
 def userdata(user_id: str):
     def read_parquets ():
-        query_2_steam = pd.read_parquet('query_2_steam.parquet')
-        query_2_reviews = pd.read_parquet('query_2_reviews.parquet')
-        return query_2_steam, query_2_reviews
+        query_2_api = pd.read_parquet('api_query2_new.parquet')
+        return query_2_api
 
-# Cantidad de dinero gastado por el usuario
+    def get_user_data(user_id,reviews_dataframe):
+        user_data = reviews_dataframe.query("user_id == @user_id")
+        user_waste = user_data["total_waste"].iloc[0]
+        recommendation = user_data["reviews_percent"].iloc[0]
+        total_reviews = float(user_data["total_reviews"].iloc[0])
 
-    def load_parquet_in_batches(file_path,user_id,chunk_size=5000):
-        """Loads a Parquet file in batches.
+        print(total_reviews)
+        print(type(total_reviews))
 
-        Args:
-            file_path: The path to the Parquet file.
-            chunk_size: The size of each batch.
-
-        Returns:
-            A list of Pandas DataFrames.
-        """
-        parquet_file = pq.ParquetFile(file_path)
-        dataframes = []
-        for batch in parquet_file.iter_batches(batch_size=5000):
-            dataframes = batch.to_pandas()
-            result = get_items_names(dataframes,user_id)
-            if result is not None :
-                return result
-        return result
-
+        json = {user_id: { "spent_money":user_waste, "recommendation %":recommendation, "reviews_amount":total_reviews}}
+        return json
     
-    def get_items_names(items_dataframe,user_id):
-        items_dataframe = items_dataframe.set_index("user_id")    
-        if user_id in items_dataframe.index:
-            found_data_frame = items_dataframe.loc[user_id]
-
-            if not found_data_frame.empty:
-                print('entra4')
-                return found_data_frame
-        else:
-            return None
-        return None
-
-
-    def get_items_id(row_df):
-        items= []
-        user_items = row_df.iloc[0]
-
-        for item in user_items:
-            items.append(item['item_id'])
-        return items
-
-    def get_waste(items_list):
-        waste = 0
-        prices = []
-        for item in items_list:
-            intintem=int(item)
-            price = query_2_steam.query("id == @intintem")
-
-            if len(price['price'].values) > 0:
-                waste = waste+price['price'].values[0]
-                prices.append((price['price'].values))
-        return waste
-
-
-    def percent_reviews(user_id):
-        try:
-            recommends = query_2_reviews.query("user_id == @user_id")
-            recommends_true = query_2_reviews.query("(user_id == @user_id) &(recommend == True)")
-            items_amount = len(recommends)
-            percent = (len(recommends_true) * 100) / items_amount
-            return percent, items_amount
-        except ZeroDivisionError:
-            return 0,0
-        
-    # Load small Parquets
-    query_2_steam, query_2_reviews = read_parquets()
-
-    # Load the Parquet file in batches
-    query_2_items = load_parquet_in_batches('query_2_items.parquet',user_id)
-
-    items_list = get_items_id(query_2_items)  
-
-    total_waste = get_waste(items_list)
-    reviews_items_percent, total_reviews = percent_reviews(user_id)
-
-    json_output = {user_id: { "spent_money":total_waste, "recommendation %":reviews_items_percent, "reviews_amount":total_reviews}}
-    json_output
-
+    reviews_data = read_parquets()
+    json_output = get_user_data(user_id, reviews_data)
+           
 
     return json_output
     
 @app.get("/UserForGenre/{genre}")
 def UserForGenre(genre: str):
-
-    Global_Max_User_id = ''
-    Global_Max_Time_Played = 0
-
     def read_parquets ():
-        genre_grouped_steam = pd.read_parquet('genre_grouped.parquet')
-        return genre_grouped_steam
+        query_3_most_played = pd.read_parquet('api_querery3_most_played_genre.parquet')
+        query_3_years_genre = pd.read_parquet('api_query3_years_genre.parquet')
+        return query_3_most_played,query_3_years_genre
+    
+    def top_player(genre,most_played_df):
+        player_data = most_played_df.query("genre == @genre")
+        player_id = player_data["user_id"].iloc[0]
+        played_time = player_data["total_played_time"].iloc[0]
+        return player_id,played_time
 
-    def load_parquet_in_batches(file_path,Global_Max_Time_Played, Global_Max_User_id):
-        """Loads a Parquet file in batches.
+    def played_per_year(genre, years_genre_df): 
+        years_data = years_genre_df.query("genres == @genre")
+        years_data.drop(columns=['id_list'],axis=1, inplace=True)
+        years_dic = {}
+        outer_year_dic = {}
 
-        Args:
-        file_path: The path to the Parquet file.
-        chunk_size: The size of each batch.
-
-        Returns:
-        A list of Pandas DataFrames.
-        """
-        parquet_file = pq.ParquetFile(file_path)
-        dataframes = []
-        for batch in parquet_file.iter_batches(batch_size=5000):
-            dataframes = batch.to_pandas()
-            Global_Max_Time_Played, Global_Max_User_id= check_global_user(dataframes,Global_Max_Time_Played, Global_Max_User_id)
-        return Global_Max_Time_Played, Global_Max_User_id
-
-    def get_frame_genre(genre_grouped_steam,genre):  
-        genre_grouped_steam = genre_grouped_steam.set_index("genres")  
-        if genre in genre_grouped_steam.index:
-            found_data_frame = genre_grouped_steam.loc[genre]  # esto lo debería hacer una sola vez afuera
-            print('LEN ', len(found_data_frame['id_list']))
-            return found_data_frame
-        else:
-            return None
-        
-
-    def genre_check(genre_grouped_steam,item_id) :      
-            return float(item_id) in genre_grouped_steam['id_list']
-
-
-    def check_global_user (batch_user_items,Global_Max_Time_Played, Global_Max_User_id):
-        for row in batch_user_items.iterrows() :
-
-            data_row = row[1]
-            user_time_played = 0
-            user_id_row = data_row['user_id']
-            items_row = tuple(data_row['items'])
-
-            for item in items_row:
-
-                if genre_check(genre_grouped_steam,item['item_id']):
-                    user_time_played += float(item['playtime_forever']) 
+        for i in years_data:
+            year = int(i)
+            year_value = int(years_data[i].iloc[0])
+            if year_value > 0:
+                years_dic[year] = year_value
             
-            if user_time_played > Global_Max_Time_Played:
-                Global_Max_Time_Played = user_time_played
-                Global_Max_User_id = user_id_row
-        return Global_Max_Time_Played, Global_Max_User_id
-            
-    genre_grouped_steam = read_parquets()
-    genre_grouped_steam = get_frame_genre(genre_grouped_steam,genre)
+        outer_year_dic["Years"] = years_dic
+        return outer_year_dic
+    
+    most_played_df, years_genre_df = read_parquets()
+    player_id, played_time = top_player(genre,most_played_df)
+    years_dic = played_per_year(genre,years_genre_df)
+  
+    years_json = js.dumps(years_dic)
+    years_json = js.loads(years_json)
 
-    if genre_grouped_steam is not None: Global_Max_Time_Played, Global_Max_User_id = load_parquet_in_batches('query_2_items.parquet',Global_Max_Time_Played, Global_Max_User_id)
+    output_json = {"User With Most Played time para ": genre, "User": player_id, "Played_Time":played_time, "Hours Genre Was Played": years_json}
+    return output_json
 
-    print(Global_Max_Time_Played)
-    print(Global_Max_User_id)
+@app.get("/best_developer_year/{year}")
+def best_developer_year(year: int):
+    def read_parquets ():
+        top_dev_df = pd.read_parquet('api_query4_top_developes.parquet')
+        return top_dev_df
+    
+    def bring_top(top_dev_df, year):
+        top_devs_year_data = top_dev_df.nlargest(3,f'{year}')
+        top_devs_filt = top_devs_year_data[str(year)]
+        respose_list = []
 
-    return {Global_Max_User_id,Global_Max_Time_Played}
+        for i in top_devs_filt.index:
+            respose_list.append([i])         
+        return respose_list
+    
+    top_dev_df = read_parquets()
+
+    if year > 2009 and year <2022:
+        json_list = bring_top(top_dev_df, year)
+        json_response = {"First Place":json_list[0] , "Second Place":json_list[1], "Third Place":json_list[2]}
+    else:
+        json_response = {"message": f"Year {year} wasn't a great year for game try for years in range 2010-2021"}
+    return json_response
+
+@app.get("/developer_reviews_analysis/{developer}")
+def best_developer_year(developer: str):
+    def read_parquets ():
+        dev_sentiment_df = pd.read_parquet('api_query5_dev_sent.parquet')
+        return dev_sentiment_df
+    
+    def retrieve_dev_sent(dev_sentiment_df,developer):
+        dev_data = dev_sentiment_df.query("developer == @developer")
+        positive = (dev_data['Positive'])
+        negative = (dev_data['Negative'])
+        positive_value= positive.iloc[0]
+        negative_value= negative.iloc[0]
+        return positive_value,negative_value
+
+    dev_sentiment_df = read_parquets()
+    positive_value,negative_value = retrieve_dev_sent(dev_sentiment_df, developer)
+    json_response = {f"{developer}": {"Positive": positive_value, "Negative": negative_value}}
+    return json_response
