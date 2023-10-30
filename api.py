@@ -5,7 +5,6 @@ import pyarrow.parquet as pq
 from ast import literal_eval
 import pandas as pd
 import json as js
-import os
 
 app = FastAPI()
 
