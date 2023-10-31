@@ -52,7 +52,7 @@ async def developer(developer: str):
         }
     """
     # Read the parquet file into a Pandas DataFrame
-    developers = pd.read_parquet('\Data\API\api_query1.parquet')
+    developers = pd.read_parquet('/Data/API/api_query1.parquet')
 
     # Validate Developer
     if developer not in developers['developer'].unique():
