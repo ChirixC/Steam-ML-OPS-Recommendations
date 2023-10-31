@@ -7,3 +7,4 @@ uvicorn
 foreman
 matplotlib
 seaborn
+sklearn
