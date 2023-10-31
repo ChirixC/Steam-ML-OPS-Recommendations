@@ -52,7 +52,7 @@ async def developer(developer: str):
         }
     """
     # Read the parquet file into a Pandas DataFrame
-    developers = pd.read_parquet('/Data/API/api_query1.parquet')
+    developers = pd.read_parquet('Data/API/api_query1.parquet')
 
     # Validate Developer
     if developer not in developers['developer'].unique():
@@ -83,7 +83,7 @@ async def userdata(user_id: str):
         pandas.DataFrame
         A dataframe containing the data from the parquet file.
         """
-        query_2_api = pd.read_parquet('.\\Data\\API\\api_query2.parquet')
+        query_2_api = pd.read_parquet('../Data/API/api_query2.parquet')
         return query_2_api
 
     def get_user_data(user_id,reviews_dataframe):
