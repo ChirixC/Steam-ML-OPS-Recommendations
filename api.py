@@ -52,7 +52,7 @@ async def developer(developer: str):
         }
     """
     # Read the parquet file into a Pandas DataFrame
-    developers = pd.read_parquet('.\\Data\\API\\api_query1.parquet')
+    developers = pd.read_parquet('\Data\API\api_query1.parquet')
 
     # Validate Developer
     if developer not in developers['developer'].unique():
@@ -223,7 +223,7 @@ async def best_developer_year(year: int):
         pandas.DataFrame
         A dataframe containing the data from the parquet file api_query4_top_developes.parquet, which has columns: developer, and one column for each year from 2010 to 2020 with the number of games developed by that developer in that year.
         """
-        top_dev_df = pd.read_parquet('.\\Data\\API\\api_query4_top_developes.parquet')
+        top_dev_df = pd.read_parquet('\Data\API\api_query4_top_developes.parquet')
         return top_dev_df
     
     def bring_top(top_dev_df, year):
