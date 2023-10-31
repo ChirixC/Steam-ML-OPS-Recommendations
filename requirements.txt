@@ -5,3 +5,4 @@ streamlit
 fastapi
 uvicorn
 foreman
+matplotlib
