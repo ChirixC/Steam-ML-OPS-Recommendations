@@ -6,3 +6,4 @@ fastapi
 uvicorn
 foreman
 matplotlib
+seaborn
