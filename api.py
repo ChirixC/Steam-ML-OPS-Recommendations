@@ -83,7 +83,7 @@ async def userdata(user_id: str):
         pandas.DataFrame
         A dataframe containing the data from the parquet file.
         """
-        query_2_api = pd.read_parquet('../Data/API/api_query2.parquet')
+        query_2_api = pd.read_parquet('Data/APIapi_query2.parquet')
         return query_2_api
 
     def get_user_data(user_id,reviews_dataframe):
@@ -139,8 +139,8 @@ async def UserForGenre(genre: str):
         tuple of pandas.DataFrame
         A tuple containing two dataframes: query_3_most_played and query_3_years_genre. The first dataframe contains the data from the parquet file api_query3_most_played_genre.parquet, which has columns: user_id, genre, total_played_time. The second dataframe contains the data from the parquet file api_query3_years_genre.parquet, which has columns: genres, id_list, and one column for each year from 2010 to 2020.
         """
-        query_3_most_played = pd.read_parquet('.\\Data\\API\\api_query3_most_played_genre.parquet')
-        query_3_years_genre = pd.read_parquet('.\\Data\\API\\api_query3_years_genre.parquet')
+        query_3_most_played = pd.read_parquet('Data/API/api_query3_most_played_genre.parquet')
+        query_3_years_genre = pd.read_parquet('Data/API/api_query3_years_genre.parquet')
         return query_3_most_played,query_3_years_genre
     
     def top_player(genre,most_played_df):
@@ -223,7 +223,7 @@ async def best_developer_year(year: int):
         pandas.DataFrame
         A dataframe containing the data from the parquet file api_query4_top_developes.parquet, which has columns: developer, and one column for each year from 2010 to 2020 with the number of games developed by that developer in that year.
         """
-        top_dev_df = pd.read_parquet('\Data\API\api_query4_top_developes.parquet')
+        top_dev_df = pd.read_parquet('Data/API/api_query4_top_developes.parquet')
         return top_dev_df
     
     def bring_top(top_dev_df, year):
@@ -270,7 +270,7 @@ async def best_developer_year(developer: str):
         pandas.DataFrame
         A dataframe containing the data from the parquet file api_query5_dev_sent.parquet, which has columns: developer, Positive, and Negative with the sentiment scores of the reviews for each developer.
         """
-        dev_sentiment_df = pd.read_parquet('.\\Data\\API\\api_query5_dev_sent.parquet')
+        dev_sentiment_df = pd.read_parquet('Data/API/api_query5_dev_sent.parquet')
         return dev_sentiment_df
     
     def retrieve_dev_sent(dev_sentiment_df,developer):
